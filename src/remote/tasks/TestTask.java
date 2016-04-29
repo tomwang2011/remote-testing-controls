@@ -59,6 +59,9 @@ public class TestTask extends Task {
 					_runPortalImplTests(portalImplPath, properties);
 				}
 
+				if (fullPath.startsWith(portalDir.resolve("modules"))) {
+					_runModuleTests(fullPath, properties);
+				}
 			}
 			else {
 				System.out.println(_testClass + " is not found.");
@@ -120,6 +123,103 @@ public class TestTask extends Task {
 		}
 
 		return _path;
+	}
+
+	private Path _resolveModulePath(Path fullPath) {
+		Path currentPath = fullPath;
+		Path currentPathName = currentPath.getFileName();
+
+		String currentPathNameString = currentPathName.toString();
+
+		while (!currentPathNameString.equals("src")) {
+			currentPath = currentPath.getParent();
+			currentPathName = currentPath.getFileName();
+			currentPathNameString = currentPathName.toString();
+		}
+
+		return currentPath.getParent();
+	}
+
+	private void _runModuleTests(Path fullPath, Properties properties)
+		throws Exception {
+
+		Path implSrcPath = Paths.get(
+			properties.getProperty("portal.dir"), "portal-impl/src");
+
+		Path portalExtPath = implSrcPath.resolve("portal-ext.properties");
+
+		Path backupFilePath = implSrcPath.resolve(
+			"portal-ext.properties.backup");
+
+		if (Files.exists(portalExtPath)) {
+			Files.copy(
+				portalExtPath, backupFilePath,
+				StandardCopyOption.REPLACE_EXISTING);
+		}
+
+		TaskUtils.createTestExtProperties(portalExtPath, _dbType);
+
+		Path tomcatPortalExtPath = Paths.get(
+			properties.getProperty("tomcat.dir"),
+			"webapps/ROOT/WEB-INF/classes/portal-ext.properties");
+
+		Files.copy(
+				portalExtPath, tomcatPortalExtPath,
+				StandardCopyOption.REPLACE_EXISTING);
+
+		Path portalPath = Paths.get(properties.getProperty("portal.dir"));
+
+		Path gradlewPath = portalPath.resolve("gradlew");
+
+		if (_dbType.equals("db2") || _dbType.equals("oracle") ||
+			_dbType.equals("sybase")) {
+			TaskUtils.runDeployDaoDB(gradlewPath, portalPath);
+		}
+
+		Path modulePath = _resolveModulePath(fullPath);
+
+		List<String> testTask = new ArrayList<>();
+
+		testTask.add(gradlewPath.toString());
+		testTask.add("testIntegration");
+		testTask.add("--tests");
+		testTask.add("*." + _testClass);
+
+		ProcessBuilder processBuilder = new ProcessBuilder(testTask);
+
+		processBuilder.directory(modulePath.toFile());
+
+		Process process = processBuilder.start();
+
+		String line;
+
+		try(BufferedReader br = new BufferedReader(
+			new InputStreamReader(process.getInputStream()))) {
+
+			while ((line = br.readLine()) != null) {
+				System.out.println(line);
+			}
+		}
+
+		try(BufferedReader br = new BufferedReader(
+			new InputStreamReader(process.getErrorStream()))) {
+
+			while ((line = br.readLine()) != null) {
+				System.out.println(line);
+			}
+		}
+
+		Files.delete(tomcatPortalExtPath);
+
+		if (Files.exists(backupFilePath)) {
+			Files.move(
+				backupFilePath, portalExtPath,
+				StandardCopyOption.REPLACE_EXISTING);
+
+			Files.copy(
+				portalExtPath, tomcatPortalExtPath,
+				StandardCopyOption.REPLACE_EXISTING);
+		}
 	}
 
 	private void _runPortalImplTests(Path portalImplPath, Properties properties)
