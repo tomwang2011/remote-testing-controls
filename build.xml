@@ -165,4 +165,72 @@
 		<build-db
 			database.type="sybase"/>
 	</target>
+
+	<target name="killSSHTunnel">
+		<exec executable="sh">
+			<arg value="-c" />
+			<arg value="ps axf | grep 9999 | grep -v grep | awk &apos;{print &quot;kill -9 &quot; $1}	&apos;| sh" />
+		</exec>
+	</target>
+
+	<target name="test">
+		<ant antfile="${portal.dir}/build-test.xml" dir="${portal.dir}" target="copy-optional-jars">
+			<property name="database.type" value="${database.type}" />
+			<property name="todir" value="${portal.dir}/lib/development" />
+		</ant>
+
+		<ant antfile="${portal.dir}/build-test.xml" dir="${portal.dir}" target="copy-optional-jars">
+			<property name="database.type" value="${database.type}" />
+			<property name="todir" value="${tomcat.dir}/webapps/ROOT/WEB-INF/lib" />
+		</ant>
+
+		<input unless:set="test.class" message="test-class: " addproperty="test.class" />
+
+		<if>
+			<not>
+				<available file="classes" type="dir"/>
+			</not>
+			<then>
+				<mkdir dir="classes"/>
+			</then>
+		</if>
+
+		<javac srcdir="src" destdir="classes" classpath="lib" debug="on" />
+
+		<taskdef name="testtask" classname="remote.tasks.TestTask" classpath="classes" />
+
+		<testtask testClass="${test.class}" dbType="${database.type}" />
+
+		<antcall target="killSSHTunnel" />
+	</target>
+
+	<target name="test-db2">
+		<property name="database.type" value="db2" />
+
+		<antcall target="test" />
+	</target>
+
+	<target name="test-mysql">
+		<property name="database.type" value="mysql" />
+
+		<antcall target="test" />
+	</target>
+
+	<target name="test-oracle">
+		<property name="database.type" value="oracle" />
+
+		<antcall target="test" />
+	</target>
+
+	<target name="test-postgresql">
+		<property name="database.type" value="postgresql" />
+
+		<antcall target="test" />
+	</target>
+
+	<target name="test-sybase">
+		<property name="database.type" value="sybase" />
+
+		<antcall target="test" />
+	</target>
 </project>
