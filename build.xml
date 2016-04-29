@@ -205,6 +205,67 @@
 		</exec>
 	</target>
 
+	<target name="prepareDB">
+		<ant antfile="${portal.dir}/build-test.xml" dir="${portal.dir}" target="copy-optional-jars">
+			<property name="database.type" value="${database.type}" />
+			<property name="todir" value="${portal.dir}/lib/development" />
+		</ant>
+
+		<ant antfile="${portal.dir}/build-test.xml" dir="${portal.dir}" target="copy-optional-jars">
+			<property name="database.type" value="${database.type}" />
+			<property name="todir" value="${tomcat.dir}/webapps/ROOT/WEB-INF/lib" />
+		</ant>
+
+		<if>
+			<not>
+				<available file="classes" type="dir"/>
+			</not>
+			<then>
+				<mkdir dir="classes"/>
+			</then>
+		</if>
+
+		<javac srcdir="src" destdir="classes" classpath="lib" debug="on" />
+
+		<taskdef name="createPropertiesTask" classname="remote.tasks.CreatePropertiesTask" classpath="classes" />
+
+		<createPropertiesTask dbType="${database.type}" />
+
+		<taskdef name="createTunnelTask" classname="remote.tasks.CreateTunnelTask" classpath="classes" />
+
+		<createTunnelTask dbType="${database.type}" />
+	</target>
+
+	<target name="prepareDB-db2">
+		<property name="database.type" value="db2" />
+
+		<antcall target="prepareDB" />
+	</target>
+
+	<target name="prepareDB-mysql">
+		<property name="database.type" value="mysql" />
+
+		<antcall target="prepareDB" />
+	</target>
+
+	<target name="prepareDB-oracle">
+		<property name="database.type" value="oracle" />
+
+		<antcall target="prepareDB" />
+	</target>
+
+	<target name="prepareDB-postgresql">
+		<property name="database.type" value="postgresql" />
+
+		<antcall target="prepareDB" />
+	</target>
+
+	<target name="prepareDB-sybase">
+		<property name="database.type" value="sybase" />
+
+		<antcall target="prepareDB" />
+	</target>
+
 	<target name="test">
 		<ant antfile="${portal.dir}/build-test.xml" dir="${portal.dir}" target="copy-optional-jars">
 			<property name="database.type" value="${database.type}" />
