@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Liferay-Remote-Testing-Controls" default="build" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
+	<property file="build-ext.properties" />
+	<property file="build.properties" />
+
+	<taskdef classpath="lib/ant-contrib.jar" resource="net/sf/antcontrib/antlib.xml" />
+
+	<macrodef name="build-db">
+		<attribute name="database.type" />
+		<sequential>
+			<if>
+				<or>
+					<equals arg1="@{database.type}" arg2="db2" />
+					<equals arg1="@{database.type}" arg2="oracle" />
+					<equals arg1="@{database.type}" arg2="sybase" />
+				</or>
+				<then>
+					<fetch-ee />
+				</then>
+			</if>
+
+			<ant antfile="${portal.dir}/sql/build.xml" dir="${portal.dir}/sql" target="build-db">
+				<property name="database.types" value="@{database.type}" />
+			</ant>
+
+			<deploy />
+
+			<remote-call
+				command="rm -rf ${remote.portal}/sql; tar -C ${remote.portal} -xvf remote-sql/sql.tar"
+				timeout="0"
+				failonerror="false"
+			/>
+
+			<if>
+				<equals arg1="@{database.type}" arg2="sybase" />
+				<then>
+					<remote-call
+						command="ant -f ${remote.portal}/build-test-batch.xml sybase-service-stop sybase-service-start;"
+						timeout="0"
+						failonerror="false"
+					/>
+				</then>
+			</if>
+
+			<remote-call
+				command="ant -f ${remote.portal}/build-test.xml rebuild-database -Ddatabase.type=@{database.type}"
+				timeout="0"
+				failonerror="false"
+			/>
+
+			<remote-call
+				command="rm -rf ~/${remote.workdir};"
+				timeout="0"
+				failonerror="false"
+			/>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="deploy">
+		<sequential>
+			<delete dir="bundle" quiet="true" />
+
+			<copy todir="bundle/sql">
+				<fileset dir="${portal.dir}/sql">
+					<exclude name="sql.${user.name}.properties" />
+				</fileset>
+			</copy>
+
+			<copy file="sql.properties" tofile="bundle/sql/sql.${remote.host}.lax.liferay.com.properties" />
+
+			<delete dir="deploy" quiet="true" />
+
+			<mkdir dir="deploy" />
+
+			<tar longfile="gnu" destfile="deploy/sql.tar" basedir="bundle" />
+
+			<remote-call
+				command="rm -rf ~/${remote.workdir}; mkdir ~/${remote.workdir}"
+				timeout="0"
+				failonerror="false"
+			/>
+
+			<scp todir="${remote.username}:${remote.password}@${remote.host}:~/${remote.workdir}" trust="true">
+				<fileset dir="deploy" />
+			</scp>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="fetch-ee">
+		<sequential>
+			<loadfile property="ee-git-hash" srcFile="${portal.dir}/git-commit-portal-ee" />
+
+			<exec executable="git" dir="${portal-ee.dir}" outputproperty="ee.working.branch" failifexecutionfails="false">
+				<arg line="rev-parse --abbrev-ref HEAD"/>
+			</exec>
+
+			<exec executable="git" dir="${portal-ee.dir}">
+				<arg value="stash" />
+			</exec>
+
+			<exec executable="git" dir="${portal-ee.dir}">
+				<arg value="checkout" />
+				<arg value="ee-7.0.x" />
+			</exec>
+
+			<exec executable="git" dir="${portal-ee.dir}">
+				<arg value="rebase" />
+				<arg value="${ee-git-hash}" />
+			</exec>
+
+			<copy todir="${portal.dir}/modules/private">
+				<fileset dir="${portal-ee.dir}/modules/private" />
+			</copy>
+
+			<exec executable="git" dir="${portal-ee.dir}">
+				<arg value="checkout" />
+				<arg value="${ee.working.branch}" />
+			</exec>
+
+			<exec executable="git" dir="${portal-ee.dir}">
+				<arg value="stash" />
+				<arg value="apply" />
+			</exec>
+		</sequential>
+	</macrodef>
+
+	<macrodef name="remote-call">
+		<attribute name="remote.host" default="${remote.host}" />
+		<attribute name="command" />
+		<attribute name="timeout" default="0" />
+		<attribute name="failonerror" />
+
+		<sequential>
+			<sshexec host="@{remote.host}" username="${remote.username}" password="${remote.password}" trust="true" command="@{command}" timeout="@{timeout}" failonerror="@{failonerror}" />
+		</sequential>
+	</macrodef>
+
+	<target name="build">
+		<input unless:set="database.type" message="database: " addproperty="database.type" />
+
+		<antcall target="build-${database.type}" />
+	</target>
+
+	<target name="build-db2">
+		<build-db
+			database.type="db2"/>
+	</target>
+
+	<target name="build-mysql">
+		<build-db
+			database.type="mysql"/>
+	</target>
+
+	<target name="build-oracle">
+		<build-db
+			database.type="oracle"/>
+	</target>
+
+	<target name="build-postgresql">
+		<build-db
+			database.type="postgresql"/>
+	</target>
+
+	<target name="build-sybase">
+		<build-db
+			database.type="sybase"/>
+	</target>
+</project>

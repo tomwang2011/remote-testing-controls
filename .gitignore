@@ -1,0 +1,6 @@
+classes/*
+bundle/*
+deploy/*
+build-ext.properties
+.ant-targets-build.xml
+/nbproject/private/
