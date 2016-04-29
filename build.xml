@@ -135,6 +135,38 @@
 		</sequential>
 	</macrodef>
 
+	<target name="all" depends="build, test" />
+
+	<target name="all-db2">
+		<property name="database.type" value="db2" />
+
+		<antcall target="all" />
+	</target>
+
+	<target name="all-mysql">
+		<property name="database.type" value="mysql" />
+
+		<antcall target="all" />
+	</target>
+
+	<target name="all-oracle">
+		<property name="database.type" value="oracle" />
+
+		<antcall target="all" />
+	</target>
+
+	<target name="all-postgresql">
+		<property name="database.type" value="postgresql" />
+
+		<antcall target="all" />
+	</target>
+
+	<target name="all-sybase">
+		<property name="database.type" value="sybase" />
+
+		<antcall target="all" />
+	</target>
+
 	<target name="build">
 		<input unless:set="database.type" message="database: " addproperty="database.type" />
 
