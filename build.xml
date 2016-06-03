@@ -9,11 +9,14 @@
 		<attribute name="database.type" />
 		<sequential>
 			<if>
-				<or>
-					<equals arg1="@{database.type}" arg2="db2" />
-					<equals arg1="@{database.type}" arg2="oracle" />
-					<equals arg1="@{database.type}" arg2="sybase" />
-				</or>
+				<and>
+					<equals arg1="${is.ee.portal}" arg2="false" />
+					<or>
+						<equals arg1="@{database.type}" arg2="db2" />
+						<equals arg1="@{database.type}" arg2="oracle" />
+						<equals arg1="@{database.type}" arg2="sybase" />
+					</or>
+				</and>
 				<then>
 					<fetch-ee />
 				</then>
