@@ -99,6 +99,11 @@
 
 			<exec executable="git" dir="${portal-ee.dir}">
 				<arg value="stash" />
+				<arg value="clear" />
+			</exec>
+
+			<exec executable="git" dir="${portal-ee.dir}">
+				<arg value="stash" />
 			</exec>
 
 			<exec executable="git" dir="${portal-ee.dir}">
@@ -106,9 +111,9 @@
 				<arg value="ee-7.0.x" />
 			</exec>
 
-			<exec executable="git" dir="${portal-ee.dir}">
-				<arg value="rebase" />
-				<arg value="${ee-git-hash}" />
+			<exec executable="/bin/sh" dir="${portal-ee.dir}">
+				<arg value="-c" />
+				<arg value="git rebase ${ee-git-hash}" />
 			</exec>
 
 			<copy todir="${portal.dir}/modules/private">
