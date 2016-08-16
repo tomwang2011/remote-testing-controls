@@ -324,19 +324,6 @@
 				<move file="${portal.dir}/portal-impl/test/portal-test-ext.properties.backup" tofile="${portal.dir}/portal-impl/test/portal-test-ext.properties" />
 			</then>
 		</if>
-
-		<if>
-			<available file="${portal.dir}/portal-impl/src/portal-ext.properties.backup" />
-			<then>
-				<move file="${portal.dir}/portal-impl/src/portal-ext.properties.backup" tofile="${portal.dir}/portal-impl/src/portal-ext.properties" />
-
-				<copy file="${portal.dir}/portal-impl/src/portal-ext.properties" tofile="${tomcat.dir}/webapps/ROOT/WEB-INF/classes/portal-ext.properties" />
-			</then>
-			<else>
-				<delete file="${portal.dir}/portal-impl/src/portal-ext.properties" />
-				<delete file="${tomcat.dir}/webapps/ROOT/WEB-INF/classes/portal-ext.properties" />
-			</else>
-		</if>
 	</target>
 
 	<target name="test">
