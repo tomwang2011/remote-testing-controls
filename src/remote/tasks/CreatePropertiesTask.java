@@ -61,17 +61,6 @@ public class CreatePropertiesTask extends Task{
 			Path portalExtPath = portalImplSrcPath.resolve(
 				"portal-ext.properties");
 
-			Path portalExtBackup = portalImplSrcPath.resolve(
-				"portal-ext.properties.backup");
-
-			if (Files.exists(portalExtPath)) {
-				Files.copy(
-					portalExtPath, portalExtBackup,
-					StandardCopyOption.REPLACE_EXISTING);
-			}
-
-			TaskUtils.createTestExtProperties(portalExtPath, _dbType);
-
 			Path tomcatPortalExtPath = Paths.get(
 				properties.getProperty("tomcat.dir"),
 				"webapps/ROOT/WEB-INF/classes/portal-ext.properties");
@@ -79,6 +68,8 @@ public class CreatePropertiesTask extends Task{
 			Files.copy(
 					portalExtPath, tomcatPortalExtPath,
 					StandardCopyOption.REPLACE_EXISTING);
+
+			TaskUtils.createTestExtProperties(tomcatPortalExtPath, _dbType);
 		}
 		catch (Exception ex) {
 			Logger.getLogger(CreatePropertiesTask.class.getName()).log(Level.SEVERE, null, ex);
