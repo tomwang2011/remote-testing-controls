@@ -53,7 +53,7 @@
 				<equals arg1="@{database.type}" arg2="sybase" />
 				<then>
 					<remote-call
-						command="ant -f ${remote.portal}/build-test-batch.xml sybase-service-stop sybase-service-start;"
+						command="ant -f ${remote.portal}/build-test-batch.xml -Denv.SYBASE_ASE=${sybase.ase} sybase-service-stop sybase-service-start;"
 						timeout="0"
 						failonerror="false"
 					/>
