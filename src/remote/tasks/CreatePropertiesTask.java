@@ -79,14 +79,6 @@ public class CreatePropertiesTask extends Task{
 			Files.copy(
 					portalExtPath, tomcatPortalExtPath,
 					StandardCopyOption.REPLACE_EXISTING);
-
-			Path gradlewPath = portalPath.resolve("gradlew");
-
-			if (_dbType.equals("db2") || _dbType.equals("oracle") ||
-				_dbType.equals("sybase")) {
-
-				TaskUtils.runDeployDaoDB(gradlewPath, portalPath);
-			}
 		}
 		catch (Exception ex) {
 			Logger.getLogger(CreatePropertiesTask.class.getName()).log(Level.SEVERE, null, ex);

@@ -26,6 +26,15 @@
 						</then>
 					</if>
 				</then>
+				<else>
+					<copy todir="${portal.dir}/modules/private/apps/foundation/portal/portal-dao-db">
+						<fileset dir="${portal-ee.dir}/modules/private/apps/foundation/portal/portal-dao-db" />
+					</copy>
+
+					<taskdef name="deploydaodbtask" classname="remote.tasks.DeployDaoDBTask" classpath="classes" />
+
+					<deploydaodbtask dbType="${database.type}" />
+				</else>
 			</if>
 
 			<ant antfile="${portal.dir}/sql/build.xml" dir="${portal.dir}/sql" target="build-db">
@@ -62,6 +71,18 @@
 				timeout="0"
 				failonerror="false"
 			/>
+
+			<delete dir="${portal.dir}/modules/private" quiet="true" />
+		</sequential>
+	</macrodef>
+
+	<macrodef name="compile">
+		<sequential>
+			<delete dir="classes" />
+
+			<mkdir dir="classes" />
+
+			<javac srcdir="src" destdir="classes" classpath="lib" debug="on" />
 		</sequential>
 	</macrodef>
 
@@ -188,26 +209,36 @@
 	</target>
 
 	<target name="build-db2">
+		<compile />
+
 		<build-db
 			database.type="db2"/>
 	</target>
 
 	<target name="build-mysql">
+		<compile />
+
 		<build-db
 			database.type="mysql"/>
 	</target>
 
 	<target name="build-oracle">
+		<compile />
+
 		<build-db
 			database.type="oracle"/>
 	</target>
 
 	<target name="build-postgresql">
+		<compile />
+
 		<build-db
 			database.type="postgresql"/>
 	</target>
 
 	<target name="build-sybase">
+		<compile />
+
 		<build-db
 			database.type="sybase"/>
 	</target>
@@ -220,6 +251,8 @@
 	</target>
 
 	<target name="prepareDB">
+		<compile />
+
 		<ant antfile="${portal.dir}/build-test.xml" dir="${portal.dir}" target="copy-optional-jars">
 			<property name="database.type" value="${database.type}" />
 			<property name="todir" value="${portal.dir}/lib/development" />
@@ -238,8 +271,6 @@
 				<mkdir dir="classes"/>
 			</then>
 		</if>
-
-		<javac srcdir="src" destdir="classes" classpath="lib" debug="on" />
 
 		<taskdef name="createPropertiesTask" classname="remote.tasks.CreatePropertiesTask" classpath="classes" />
 
@@ -309,6 +340,8 @@
 	</target>
 
 	<target name="test">
+		<compile />
+
 		<ant antfile="${portal.dir}/build-test.xml" dir="${portal.dir}" target="copy-optional-jars">
 			<property name="database.type" value="${database.type}" />
 			<property name="todir" value="${portal.dir}/lib/development" />
@@ -329,8 +362,6 @@
 				<mkdir dir="classes"/>
 			</then>
 		</if>
-
-		<javac srcdir="src" destdir="classes" classpath="lib" debug="on" />
 
 		<taskdef name="testtask" classname="remote.tasks.TestTask" classpath="classes" />
 
