@@ -30,10 +30,6 @@
 					<copy todir="${portal.dir}/modules/private/apps/foundation/portal/portal-dao-db">
 						<fileset dir="${portal-ee.dir}/modules/private/apps/foundation/portal/portal-dao-db" />
 					</copy>
-
-					<taskdef name="deploydaodbtask" classname="remote.tasks.DeployDaoDBTask" classpath="classes" />
-
-					<deploydaodbtask dbType="${database.type}" />
 				</else>
 			</if>
 
@@ -267,9 +263,19 @@
 
 		<createPropertiesTask dbType="${database.type}" />
 
+		<copy todir="${portal.dir}/modules/private/apps/foundation/portal/portal-dao-db">
+			<fileset dir="${portal-ee.dir}/modules/private/apps/foundation/portal/portal-dao-db" />
+		</copy>
+
+		<taskdef name="deploydaodbtask" classname="remote.tasks.DeployDaoDBTask" classpath="classes" />
+
+		<deploydaodbtask dbType="${database.type}" />
+
 		<taskdef name="createTunnelTask" classname="remote.tasks.CreateTunnelTask" classpath="classes" />
 
 		<createTunnelTask dbType="${database.type}" />
+
+		<delete dir="${portal.dir}/modules/private" quiet="true" />
 	</target>
 
 	<target name="prepareDB-db2">
