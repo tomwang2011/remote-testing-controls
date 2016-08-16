@@ -84,6 +84,7 @@ public class TaskUtils {
 		List<String> deployTask = new ArrayList<>();
 
 		deployTask.add(gradlewPath.toString());
+		deployTask.add("clean");
 		deployTask.add("deploy");
 
 		ProcessBuilder processBuilder = new ProcessBuilder(deployTask);
