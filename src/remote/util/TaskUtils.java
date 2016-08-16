@@ -67,8 +67,12 @@ public class TaskUtils {
 			Files.delete(filePath);
 		}
 
+		if (!Files.exists(filePath)) {
+			Files.createFile(filePath);
+		}
+
 		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
-				filePath, Charset.defaultCharset(), StandardOpenOption.CREATE))
+				filePath, Charset.defaultCharset(), StandardOpenOption.APPEND))
 		{
 			bufferedWriter.append(sb);
 		}
