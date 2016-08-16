@@ -263,15 +263,6 @@
 			<property name="todir" value="${tomcat.dir}/webapps/ROOT/WEB-INF/lib" />
 		</ant>
 
-		<if>
-			<not>
-				<available file="classes" type="dir"/>
-			</not>
-			<then>
-				<mkdir dir="classes"/>
-			</then>
-		</if>
-
 		<taskdef name="createPropertiesTask" classname="remote.tasks.CreatePropertiesTask" classpath="classes" />
 
 		<createPropertiesTask dbType="${database.type}" />
