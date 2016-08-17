@@ -37,7 +37,7 @@
 				<property name="database.types" value="@{database.type}" />
 			</ant>
 
-			<deploy />
+			<deploy-to-node />
 
 			<remote-call
 				command="rm -rf ${remote.portal}/sql; tar -C ${remote.portal} -xvf remote-sql/sql.tar"
@@ -82,7 +82,7 @@
 		</sequential>
 	</macrodef>
 
-	<macrodef name="deploy">
+	<macrodef name="deploy-to-node">
 		<sequential>
 			<delete dir="bundle" quiet="true" />
 
@@ -199,44 +199,42 @@
 	</target>
 
 	<target name="build">
+		<compile />
+
 		<input unless:set="database.type" message="database: " addproperty="database.type" />
 
-		<antcall target="build-${database.type}" />
+		<build-db
+			database.type="${database.type}" />
 	</target>
 
 	<target name="build-db2">
-		<compile />
+		<property name="database.type" value="db2" />
 
-		<build-db
-			database.type="db2"/>
+		<antcall target="build" />
 	</target>
 
 	<target name="build-mysql">
-		<compile />
+		<property name="database.type" value="mysql" />
 
-		<build-db
-			database.type="mysql"/>
+		<antcall target="build" />
 	</target>
 
 	<target name="build-oracle">
-		<compile />
+		<property name="database.type" value="oracle" />
 
-		<build-db
-			database.type="oracle"/>
+		<antcall target="build" />
 	</target>
 
 	<target name="build-postgresql">
-		<compile />
+		<property name="database.type" value="postgresql" />
 
-		<build-db
-			database.type="postgresql"/>
+		<antcall target="build" />
 	</target>
 
 	<target name="build-sybase">
-		<compile />
+		<property name="database.type" value="sybase" />
 
-		<build-db
-			database.type="sybase"/>
+		<antcall target="build" />
 	</target>
 
 	<target name="killSSHTunnel">
